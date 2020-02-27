@@ -89,7 +89,7 @@ func (h *HTTPSource) Read(handler func(*bindings.ReadResponse) error) error {
 
 func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	client := http.Client{Timeout: time.Second * 5}
-	req, err := http.NewRequest("POST", h.metadata.URL, bytes.NewBuffer(wq.Data))
+	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
 	if err != nil {
 		return err
 	}
