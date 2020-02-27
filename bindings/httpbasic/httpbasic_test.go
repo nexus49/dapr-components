@@ -8,7 +8,7 @@ package httpbasic
 import (
 	"testing"
 
-	"github.com/nexus49/components-contrib/bindings"
+	"github.com/nexus49/dapr-components/bindings"
 	"github.com/stretchr/testify/assert"
 )
 
