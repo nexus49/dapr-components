@@ -87,9 +87,15 @@ func (h *HTTPSource) Read(handler func(*bindings.ReadResponse) error) error {
 	return nil
 }
 
-func (h *HTTPSource) Write(req *bindings.WriteRequest) error {
+func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	client := http.Client{Timeout: time.Second * 5}
-	resp, err := client.Post(h.metadata.URL, "application/json; charset=utf-8", bytes.NewBuffer(req.Data))
+	req, err := http.NewRequest("POST", h.metadata.URL, bytes.NewBuffer(wq.Data))
+	if err != nil {
+		return err
+	}
+	req.SetBasicAuth(h.metadata.Username, h.metadata.Password)
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
