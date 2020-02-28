@@ -27,7 +27,7 @@ type token struct {
 }
 
 // NewOAuth2Middleware returns a new oAuth2 middleware
-func NewOAuth2Middleware() *Middleware {
+func NewOAuth2ClientCredentialsMiddleware() *Middleware {
 	return &Middleware{}
 }
 
