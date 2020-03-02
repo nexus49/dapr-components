@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -70,7 +71,10 @@ func (h *HTTPSource) get(url string) ([]byte, error) {
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		println(fmt.Sprintf("%+v", err))
 		return nil, err
+	} else {
+		println("Success")
 	}
 
 	if resp != nil && resp.Body != nil {
@@ -82,7 +86,10 @@ func (h *HTTPSource) get(url string) ([]byte, error) {
 func (h *HTTPSource) Read(handler func(*bindings.ReadResponse) error) error {
 	b, err := h.get(h.metadata.URL)
 	if err != nil {
+		println(fmt.Sprintf("%+v", err))
 		return err
+	} else {
+		println("Success")
 	}
 
 	handler(&bindings.ReadResponse{
@@ -104,8 +111,12 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		println(fmt.Sprintf("%+v", err))
 		return err
+	} else {
+		println("Success")
 	}
+
 	if resp != nil && resp.Body != nil {
 		resp.Body.Close()
 	}
