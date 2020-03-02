@@ -3,18 +3,18 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-package httpauth
+package httpoauth
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/dapr/components-contrib/bindings"
+	"golang.org/x/oauth2"
+	clientcredentials "golang.org/x/oauth2/clientCredentials"
 )
 
 // HTTPSource is a binding for an http url endpoint invocation
@@ -24,9 +24,11 @@ type HTTPSource struct {
 }
 
 type httpMetadata struct {
-	URL        string `json:"url"`
-	Method     string `json:"method"`
-	AuthHeader string `json:"authHeader"`
+	URL          string `json:"url"`
+	Method       string `json:"method"`
+	ClientID     string `json:"clientID"`
+	ClientSecret string `json:"clientSecret"`
+	TokenURL     string `json:"tokenURL"`
 }
 
 // NewHTTP returns a new HTTPSource
@@ -52,12 +54,14 @@ func (h *HTTPSource) Init(metadata bindings.Metadata) error {
 }
 
 func (h *HTTPSource) get(url string) ([]byte, error) {
-	client := http.Client{Timeout: time.Second * 60}
+	conf := getConfig(h)
+	ctx := context.Background()
+	client := conf.Client(ctx)
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", fmt.Sprintf(`Bearer %s`, os.Getenv(h.metadata.AuthHeader)))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -88,12 +92,15 @@ func (h *HTTPSource) Read(handler func(*bindings.ReadResponse) error) error {
 }
 
 func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
-	client := http.Client{Timeout: time.Second * 5}
+
+	conf := getConfig(h)
+	ctx := context.Background()
+	client := conf.Client(ctx)
+
 	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
 	if err != nil {
 		return err
 	}
-	req.Header.Add("Authorization", fmt.Sprintf(`Bearer %s`, os.Getenv(h.metadata.AuthHeader)))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -103,4 +110,13 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 		resp.Body.Close()
 	}
 	return nil
+}
+
+func getConfig(h *HTTPSource) clientcredentials.Config {
+	return clientcredentials.Config{
+		ClientID:     h.metadata.ClientID,
+		ClientSecret: h.metadata.ClientSecret,
+		AuthStyle:    oauth2.AuthStyleInHeader,
+		TokenURL:     h.metadata.TokenURL,
+	}
 }
