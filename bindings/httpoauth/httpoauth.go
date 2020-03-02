@@ -15,7 +15,7 @@ import (
 
 	"github.com/dapr/components-contrib/bindings"
 	"golang.org/x/oauth2"
-	clientcredentials "golang.org/x/oauth2/clientCredentials"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 // HTTPSource is a binding for an http url endpoint invocation
