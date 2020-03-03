@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -98,6 +99,7 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	client := conf.Client(ctx)
 
 	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
+	println(fmt.Sprintf("%+v", wq.Data))
 	if err != nil {
 		return err
 	}
