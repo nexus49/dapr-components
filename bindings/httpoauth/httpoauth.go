@@ -99,18 +99,22 @@ func (h *HTTPSource) Read(handler func(*bindings.ReadResponse) error) error {
 }
 
 func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
-	h.logger.Info("Received new Write call.")
+	h.logger.Debug("Received new Write call.")
 	conf := getConfig(h)
 	ctx := context.Background()
 	client := conf.Client(ctx)
 
+	h.logger.Debugf("Method: %s", h.metadata.Method)
+	h.logger.Debugf("URL: %s", h.metadata.URL)
+	h.logger.Debugf("Body: %s", string(wq.Data))
+
 	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
-	h.logger.Info(fmt.Sprintf("%+v", string(wq.Data)))
 	if err != nil {
 		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
+	h.logger.Debugf("Headers: %+v", req.Header)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
