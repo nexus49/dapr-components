@@ -97,6 +97,7 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	conf := getConfig(h)
 	ctx := context.Background()
 	client := conf.Client(ctx)
+	println("Received new call.")
 
 	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
 	println(fmt.Sprintf("%+v", wq.Data))
@@ -107,6 +108,8 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
+	} else {
+		println(fmt.Sprintf("Response: %+v", resp))
 	}
 
 	if resp != nil && resp.Body != nil {
