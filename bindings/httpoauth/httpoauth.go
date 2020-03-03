@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/dapr/components-contrib/bindings"
+	"github.com/dapr/dapr/pkg/logger"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -22,6 +23,7 @@ import (
 // nolint:golint
 type HTTPSource struct {
 	metadata httpMetadata
+	logger   logger.Logger
 }
 
 type httpMetadata struct {
@@ -32,9 +34,13 @@ type httpMetadata struct {
 	TokenURL     string `json:"tokenURL"`
 }
 
+var log = logger.NewLogger("dapr.httpoauth")
+
 // NewHTTP returns a new HTTPSource
-func NewHTTP() *HTTPSource {
-	return &HTTPSource{}
+func NewHTTPOAuth(logger logger.Logger) *HTTPSource {
+	return &HTTPSource{
+		logger: logger,
+	}
 }
 
 // Init performs metadata parsing
@@ -93,23 +99,23 @@ func (h *HTTPSource) Read(handler func(*bindings.ReadResponse) error) error {
 }
 
 func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
-
+	h.logger.Info("Received new Write call.")
 	conf := getConfig(h)
 	ctx := context.Background()
 	client := conf.Client(ctx)
-	println("Received new call.")
 
 	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
-	println(fmt.Sprintf("%+v", wq.Data))
+	h.logger.Info(fmt.Sprintf("%+v", string(wq.Data)))
 	if err != nil {
 		return err
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	} else {
-		println(fmt.Sprintf("Response: %+v", resp))
+		h.logger.Info(fmt.Sprintf("Response: %+v", resp))
 	}
 
 	if resp != nil && resp.Body != nil {
