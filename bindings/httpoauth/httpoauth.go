@@ -104,9 +104,9 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	ctx := context.Background()
 	client := conf.Client(ctx)
 
-	h.logger.Debugf("Method: %s", h.metadata.Method)
-	h.logger.Debugf("URL: %s", h.metadata.URL)
-	h.logger.Debugf("Body: %s", string(wq.Data))
+	h.logger.Infof("Method: %s", h.metadata.Method)
+	h.logger.Infof("URL: %s", h.metadata.URL)
+	h.logger.Infof("Body: %s", string(wq.Data))
 
 	req, err := http.NewRequest(h.metadata.Method, h.metadata.URL, bytes.NewBuffer(wq.Data))
 	if err != nil {
@@ -114,7 +114,7 @@ func (h *HTTPSource) Write(wq *bindings.WriteRequest) error {
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	h.logger.Debugf("Headers: %+v", req.Header)
+	h.logger.Infof("Headers: %+v", req.Header)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
